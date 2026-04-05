@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>Weight Assistant</h1>
+        <nav>
+            <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+            <button class="nav-btn" data-tab="profile">Profile</button>
+            <button class="nav-btn" data-tab="weight">Weight</button>
+            <button class="nav-btn" data-tab="menu">Menu</button>
+            <button class="nav-btn" data-tab="workout">Workout</button>
+            <button class="nav-btn" data-tab="meals">Meal Log</button>
+            <button class="nav-btn" data-tab="dishes">Dish Catalog</button>
+        </nav>
+        <div id="status-bar">
+            <span id="ollama-status">Checking Ollama...</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Dashboard Tab -->
+        <section id="tab-dashboard" class="tab-content active">
+            <h2>Today's Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="card" id="dash-profile">
+                    <h3>Profile</h3>
+                    <div id="dash-profile-content"><p class="muted">Loading...</p></div>
+                </div>
+                <div class="card" id="dash-weight">
+                    <h3>Weight Trend</h3>
+                    <div id="dash-weight-content"><p class="muted">Loading...</p></div>
+                </div>
+                <div class="card" id="dash-activity">
+                    <h3>Today's Activity</h3>
+                    <div id="dash-activity-content"><p class="muted">No activity logged today</p></div>
+                </div>
+                <div class="card" id="dash-menu">
+                    <h3>Today's Menu</h3>
+                    <div id="dash-menu-content"><p class="muted">No menu loaded</p></div>
+                </div>
+                <div class="card wide" id="dash-recommendation">
+                    <h3>Recommendation</h3>
+                    <div id="dash-rec-content"><p class="muted">Set up your profile and load today's menu to get a recommendation.</p></div>
+                </div>
+                <div class="card" id="dash-meals">
+                    <h3>What I Ate Today</h3>
+                    <div id="dash-meals-content"><p class="muted">No meals logged today</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Tab -->
+        <section id="tab-profile" class="tab-content">
+            <h2>Profile</h2>
+            <form id="profile-form" class="form-card">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prof-age">Age</label>
+                        <input type="number" id="prof-age" min="10" max="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-sex">Sex</label>
+                        <select id="prof-sex" required>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prof-height">Height (cm)</label>
+                        <input type="number" id="prof-height" min="50" max="300" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-weight">Current Weight (kg)</label>
+                        <input type="number" id="prof-weight" min="20" max="500" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prof-target">Target Weight (kg)</label>
+                        <input type="number" id="prof-target" min="20" max="500" step="0.1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="prof-activity">Activity Level</label>
+                    <select id="prof-activity">
+                        <option value="sedentary">Sedentary</option>
+                        <option value="light">Light</option>
+                        <option value="moderate" selected>Moderate</option>
+                        <option value="active">Active</option>
+                        <option value="very_active">Very Active</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Save Profile</button>
+                <div id="profile-msg" class="msg"></div>
+            </form>
+        </section>
+
+        <!-- Weight Tab -->
+        <section id="tab-weight" class="tab-content">
+            <h2>Weight History</h2>
+            <form id="weight-form" class="form-card inline-form">
+                <div class="form-group">
+                    <label for="w-date">Date</label>
+                    <input type="date" id="w-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="w-kg">Weight (kg)</label>
+                    <input type="number" id="w-kg" min="20" max="500" step="0.1" required>
+                </div>
+                <button type="submit" class="btn-primary">Add Entry</button>
+            </form>
+            <div id="weight-msg" class="msg"></div>
+            <div id="weight-chart" class="chart-area"></div>
+            <table id="weight-table" class="data-table">
+                <thead><tr><th>Date</th><th>Weight (kg)</th><th></th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Menu Tab -->
+        <section id="tab-menu" class="tab-content">
+            <h2>Daily Menu</h2>
+            <div class="form-card inline-form">
+                <div class="form-group">
+                    <label for="menu-date">Date</label>
+                    <input type="date" id="menu-date">
+                </div>
+                <button class="btn-primary" id="btn-fetch-menu">Fetch Menu from API</button>
+            </div>
+            <div id="menu-msg" class="msg"></div>
+            <div id="menu-display" class="card">
+                <p class="muted">No menu loaded. Click "Fetch Menu" to load today's menu.</p>
+            </div>
+        </section>
+
+        <!-- Workout Tab -->
+        <section id="tab-workout" class="tab-content">
+            <h2>Workout / Activity</h2>
+            <form id="workout-form" class="form-card">
+                <div class="form-group">
+                    <label for="wo-date">Date</label>
+                    <input type="date" id="wo-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="wo-text">Workout Description</label>
+                    <textarea id="wo-text" rows="3" placeholder="e.g. 30 min jog in the park, then 15 min stretching"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wo-duration">Duration (min)</label>
+                        <input type="number" id="wo-duration" min="0" max="1440" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="wo-intensity">Intensity</label>
+                        <select id="wo-intensity">
+                            <option value="">-- Optional --</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="wo-steps">Steps (optional)</label>
+                        <input type="number" id="wo-steps" min="0" value="">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Log Workout</button>
+                <div id="workout-msg" class="msg"></div>
+            </form>
+            <h3>Recent Workouts</h3>
+            <div id="workout-list"></div>
+        </section>
+
+        <!-- Meal Log Tab -->
+        <section id="tab-meals" class="tab-content">
+            <h2>Meal Log</h2>
+            <form id="meal-form" class="form-card">
+                <div class="form-group">
+                    <label for="ml-date">Date</label>
+                    <input type="date" id="ml-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="ml-dishes">Dishes (comma separated)</label>
+                    <input type="text" id="ml-dishes" placeholder="e.g. pasta al pomodoro, pollo arrosto, insalata mista" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label><input type="checkbox" id="ml-bread"> Bread</label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label><input type="checkbox" id="ml-second"> Second Serving</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ml-notes">Notes (optional)</label>
+                    <input type="text" id="ml-notes" placeholder="Any notes about this meal">
+                </div>
+                <button type="submit" class="btn-primary">Log Meal</button>
+                <div id="meal-msg" class="msg"></div>
+            </form>
+            <h3>Recent Meals</h3>
+            <div id="meal-list"></div>
+        </section>
+
+        <!-- Dish Catalog Tab -->
+        <section id="tab-dishes" class="tab-content">
+            <h2>Dish Catalog</h2>
+            <form id="dish-form" class="form-card inline-form">
+                <div class="form-group">
+                    <label for="dc-name">Dish Name</label>
+                    <input type="text" id="dc-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="dc-cal">Calories / serving</label>
+                    <input type="number" id="dc-cal" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="dc-cat">Category</label>
+                    <select id="dc-cat">
+                        <option value="primo">Primo</option>
+                        <option value="secondo">Secondo</option>
+                        <option value="contorno">Contorno</option>
+                        <option value="dessert">Dessert</option>
+                        <option value="extra">Extra</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Add / Update</button>
+            </form>
+            <div id="dish-msg" class="msg"></div>
+            <div class="form-card inline-form">
+                <div class="form-group">
+                    <label for="dc-search">Search</label>
+                    <input type="text" id="dc-search" placeholder="Search dishes...">
+                </div>
+            </div>
+            <table id="dish-table" class="data-table">
+                <thead><tr><th>Name</th><th>Calories</th><th>Category</th><th>Confidence</th><th></th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>Weight Assistant &mdash; Local-first nutrition tracker. All data stays on your machine.</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
